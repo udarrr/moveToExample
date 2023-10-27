@@ -11,22 +11,25 @@ describe("My application", () => {
 });
 
 describe("My application", () => {
-  it("move to with scroll", async () => {
-    try {
-      await browser.url("https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe");
-      await (await browser.$('#content td.bc-support.bc-browser-firefox_android span.bc-version-label')).moveTo()
-      await browser.pause(5000)
-    } catch (err: any){
-      console.log(err.message)
-    }
-    await browser.url("https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe");
-    await (await browser.$('#content td.bc-support.bc-browser-firefox_android span.bc-version-label')).scrollIntoView({block: 'center'})
-    await browser.pause(5000)
-    await (await browser.$('#content td.bc-support.bc-browser-firefox_android span.bc-version-label')).moveTo()
-    await browser.pause(5000)
+  before(async () => {
+    await browser.url("https://uk.javascript.info/mousemove-mouseover-mouseout-mouseenter-mouseleave");
+    await (await browser.$('a[href="pointer.html"]')).click();
+    await (await browser.$("#parent")).waitForExist()
+  })
+
+  it("moveTo in iframe", async () => {
+    await (await browser.$("#parent")).moveTo();
+    const value = await (await browser.$("#text")).getValue();
+
+    expect(value.endsWith('center\n'))
+  });
+
+  it("moveTo in iframe", async () => {
+    const iframe = await browser.$("iframe[scr='pointer.html']");
+    await browser.switchToFrame(iframe);
+    await (await browser.$("#parent")).moveTo()
+    const value = await (await browser.$("#text")).getValue();
+    
+    expect(value.endsWith('center\n'))
   });
 });
-
-
-
-
