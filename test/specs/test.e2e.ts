@@ -1,35 +1,74 @@
-describe("My application", () => {
-    it("moveTo in iframe", async () => {
-      await browser.url("https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe");
-      await (await browser.$("#root div.theme-switcher-menu > button > span")).moveTo(); //can be moved to here outside of iframe the element should be highlighted
-      await browser.pause(5000)
-      const iframe = await browser.$("#content > article > section:nth-child(3) > div > iframe");
-      await browser.switchToFrame(iframe);
-      await (await browser.$("#reset")).moveTo(); //can't be moved to here inside of iframe reset button should be highlighted
-      await browser.pause(5000)
-    });
+describe("Current implementation", () => {
+  it("should login with valid credentials", async () => {
+    await browser.url(
+      "https://blog.logrocket.com/hide-scrollbar-without-impacting-scrolling-css/"
+    );
+    for (let scrollType of [
+      "#cp_embed_abXZRex",
+      "#cp_embed_wvNzMdN",
+      "#cp_embed_JjxKdgP",
+    ]) {
+      const elm = await browser.$(scrollType);
+      await elm.moveTo();
+      //before
+      await browser.pause(3000);
+      await browser.switchToFrame(elm);
+      const resultFrame = await browser.$("#result-iframe");
+      await browser.switchToFrame(resultFrame);
+      await (
+        await browser.$(
+          scrollType === "#cp_embed_JjxKdgP"
+            ? "body > div > p:nth-child(40)"
+            : "body > div > div > p:nth-child(10)"
+        )
+      ).scrollIntoView();
+      //after
+      await browser.pause(3000);
+      await browser.switchToParentFrame();
+      await browser.switchToParentFrame();
+    }
+  });
 });
 
-describe("My application", () => {
-  before(async () => {
-    await browser.url("https://uk.javascript.info/mousemove-mouseover-mouseout-mouseenter-mouseleave");
-    await (await browser.$('a[href="pointer.html"]')).click();
-    await (await browser.$("#parent")).waitForExist()
-  })
-
-  it("moveTo in iframe", async () => {
-    await (await browser.$("#parent")).moveTo();
-    const value = await (await browser.$("#text")).getValue();
-
-    expect(value.endsWith('center\n'))
-  });
-
-  it("moveTo in iframe", async () => {
-    const iframe = await browser.$("iframe[scr='pointer.html']");
-    await browser.switchToFrame(iframe);
-    await (await browser.$("#parent")).moveTo()
-    const value = await (await browser.$("#text")).getValue();
-    
-    expect(value.endsWith('center\n'))
+describe("Just origin", () => {
+  it("should login with valid credentials", async () => {
+    browser.overwriteCommand(
+      "scrollIntoView",
+      async function (_origin) {
+        await browser
+          .action("wheel")
+          //@ts-ignore
+          .scroll({ origin: this })
+          .perform();
+      },
+      true
+    );
+    await browser.url(
+      "https://blog.logrocket.com/hide-scrollbar-without-impacting-scrolling-css/"
+    );
+    for (let scrollType of [
+      "#cp_embed_abXZRex",
+      "#cp_embed_wvNzMdN",
+      "#cp_embed_JjxKdgP",
+    ]) {
+      const elm = await browser.$(scrollType);
+      await elm.moveTo();
+      //before
+      await browser.pause(3000);
+      await browser.switchToFrame(elm);
+      const resultFrame = await browser.$("#result-iframe");
+      await browser.switchToFrame(resultFrame);
+      await (
+        await browser.$(
+          scrollType === "#cp_embed_JjxKdgP"
+            ? "body > div > p:nth-child(40)"
+            : "body > div > div > p:nth-child(10)"
+        )
+      ).scrollIntoView();
+      //after
+      await browser.pause(3000);
+      await browser.switchToParentFrame();
+      await browser.switchToParentFrame();
+    }
   });
 });
